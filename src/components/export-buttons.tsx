@@ -14,16 +14,12 @@ export function ExportButtons({ previewRef }: ExportButtonsProps) {
         if (!svg) return
 
         try {
-            // 创建一个临时的div来包含SVG
             const container = document.createElement('div')
             container.style.background = type === 'jpg' ? '#ffffff' : 'transparent'
             container.innerHTML = svg.outerHTML
             document.body.appendChild(container)
 
-            // 使用html2canvas捕获临时div
             const canvas = await html2canvas(container)
-
-            // 移除临时div
             document.body.removeChild(container)
 
             if (type === 'pdf') {
@@ -47,27 +43,30 @@ export function ExportButtons({ previewRef }: ExportButtonsProps) {
     }
 
     return (
-        <div className="flex gap-2">
+        <div className="flex items-center space-x-2">
             <button
                 onClick={() => exportAs('png')}
-                className="flex items-center gap-1 px-3 py-1 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="导出为PNG"
             >
                 <Download className="w-4 h-4" />
-                PNG
+                <span>PNG</span>
             </button>
             <button
                 onClick={() => exportAs('jpg')}
-                className="flex items-center gap-1 px-3 py-1 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="导出为JPG"
             >
                 <Download className="w-4 h-4" />
-                JPG
+                <span>JPG</span>
             </button>
             <button
                 onClick={() => exportAs('pdf')}
-                className="flex items-center gap-1 px-3 py-1 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
+                className="inline-flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title="导出为PDF"
             >
                 <Download className="w-4 h-4" />
-                PDF
+                <span>PDF</span>
             </button>
         </div>
     )

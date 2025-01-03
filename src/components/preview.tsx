@@ -10,11 +10,33 @@ interface PreviewProps {
 export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
     ({ code, className }, ref) => {
         const innerRef = useRef<HTMLDivElement>(null)
+        const containerRef = useRef<HTMLDivElement>(null)
         const actualRef = (ref as React.RefObject<HTMLDivElement>) || innerRef
         const [scale, setScale] = useState(1)
         const [position, setPosition] = useState({ x: 0, y: 0 })
         const [isDragging, setIsDragging] = useState(false)
         const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+        // 重置视图并自动适配大小
+        const resetView = useCallback(() => {
+            if (!actualRef.current || !containerRef.current) return
+
+            const svg = actualRef.current.querySelector('svg')
+            if (!svg) return
+
+            const containerWidth = containerRef.current.clientWidth - 32 // 减去内边距
+            const containerHeight = containerRef.current.clientHeight - 32
+            const svgWidth = svg.viewBox.baseVal.width
+            const svgHeight = svg.viewBox.baseVal.height
+
+            // 计算适合容器的缩放比例
+            const scaleX = containerWidth / svgWidth
+            const scaleY = containerHeight / svgHeight
+            const newScale = Math.min(scaleX, scaleY, 1) // 不超过原始大小
+
+            setScale(newScale)
+            setPosition({ x: 0, y: 0 })
+        }, [])
 
         // 处理滚轮缩放
         const handleWheel = useCallback((e: WheelEvent) => {
@@ -46,11 +68,10 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             setIsDragging(false)
         }, [])
 
-        // 重置视图
-        const resetView = useCallback(() => {
-            setScale(1)
-            setPosition({ x: 0, y: 0 })
-        }, [])
+        // 处理双击
+        const handleDoubleClick = useCallback(() => {
+            resetView()
+        }, [resetView])
 
         // 缩放控制
         const handleZoom = useCallback((delta: number) => {
@@ -86,6 +107,8 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                     if (svgElement) {
                         svgElement.style.maxWidth = '100%'
                         svgElement.style.height = 'auto'
+                        // 渲染完成后自动适配大小
+                        resetView()
                     }
                 } catch (error) {
                     console.error('渲染图表失败:', error)
@@ -94,7 +117,7 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             }
 
             renderDiagram()
-        }, [code])
+        }, [code, resetView])
 
         return (
             <div className={`h-full flex flex-col ${className}`}>
@@ -128,11 +151,12 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                     </div>
                 </div>
                 {/* 预览区域 */}
-                <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+                <div ref={containerRef} className="flex-1 relative flex items-center justify-center overflow-hidden">
                     <div
                         ref={actualRef}
                         className="w-full h-full p-4 cursor-move"
                         onMouseDown={handleMouseDown}
+                        onDoubleClick={handleDoubleClick}
                         style={{
                             transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
                             transformOrigin: 'center',
