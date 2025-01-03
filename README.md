@@ -59,7 +59,7 @@
 
 1. 克隆项目
 ```bash
-git clone https://github.com/yourusername/mermaid_preview.git
+git clone https://github.com/zyjarge/mermaid_preview.git
 cd mermaid_preview
 ```
 
