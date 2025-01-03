@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mermaid 图表编辑器</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 20px;
+        }
+
+        .editor-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .preview-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        #mermaidCode {
+            flex: 1;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: none;
+        }
+
+        .toolbar {
+            width: 36px;
+            background: #f5f5f5;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 8px 4px;
+            z-index: 1;
+        }
+
+        .toolbar button {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar button:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        .preview-content {
+            flex: 1;
+            padding: 10px;
+            overflow: auto;
+            position: relative;
+            cursor: grab;
+        }
+
+        .preview-content:active {
+            cursor: grabbing;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #ccc;
+            margin: 4px 0;
+        }
+
+        .export-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .export-buttons button {
+            border-color: #8bc34a;
+        }
+
+        .export-buttons button:hover {
+            background: #f1f8e9;
+        }
+
+        .toolbar svg {
+            width: 14px;
+            height: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="editor-panel">
+            <textarea id="mermaidCode" placeholder="请输入mermaid代码："></textarea>
+        </div>
+        <div class="preview-panel">
+            <div class="toolbar vertical">
+                <button id="refreshPreview" title="刷新预览">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor"
+                            d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
+                    </svg>
+                </button>
+                <button id="zoomIn" title="放大">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                    </svg>
+                </button>
+                <button id="zoomReset" title="重置">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor"
+                            d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
+                    </svg>
+                </button>
+                <button id="zoomOut" title="缩小">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M19 13H5v-2h14v2z" />
+                    </svg>
+                </button>
+                <div class="divider"></div>
+                <div class="export-buttons">
+                    <button id="exportJPG" title="导出为JPG">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor"
+                                d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM9 7.5l3 3.86L18 12l3 3.86V19H3v-2.14l4-5.14z" />
+                        </svg>
+                    </button>
+                    <button id="exportPDF" title="导出为PDF">
+                        <svg viewBox="0 0 24 24" width="16" height="16">
+                            <path fill="currentColor"
+                                d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V7H10c.83 0 1.5.67 1.5 1.5v1zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V7H15c.83 0 1.5.67 1.5 1.5v3zm4-3H19v1h1.5V11H19v2h-1.5V7h3v1.5zM9 9.5h1v-1H9v1zM4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm10 5.5h1v-3h-1v3z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="preview" class="preview-content"></div>
+        </div>
+    </div>
+    <script src="mermaid.min.js"></script>
+    <script src="jspdf.umd.min.js"></script>
+    <script src="content.js"></script>
+</body>
+
+</html>

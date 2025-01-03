@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Mermaid Preview",
+  "version": "1.0",
+  "description": "实时预览和编辑Mermaid图表的Chrome插件",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/index.js"],
+      "type": "module"
+    }
+  ],
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "action": {},
+  "web_accessible_resources": [{
+    "resources": ["popup/index.html", "chunks/*", "assets/*"],
+    "matches": ["<all_urls>"]
+  }]
+} 
