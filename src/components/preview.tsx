@@ -16,6 +16,8 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
         const [position, setPosition] = useState({ x: 0, y: 0 })
         const [isDragging, setIsDragging] = useState(false)
         const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+        const [isZooming, setIsZooming] = useState(false)
+        const zoomTimeout = useRef<number>()
 
         // 重置视图并自动适配大小
         const resetView = useCallback(() => {
@@ -24,15 +26,14 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             const svg = actualRef.current.querySelector('svg')
             if (!svg) return
 
-            const containerWidth = containerRef.current.clientWidth - 32 // 减去内边距
+            const containerWidth = containerRef.current.clientWidth - 32
             const containerHeight = containerRef.current.clientHeight - 32
             const svgWidth = svg.viewBox.baseVal.width
             const svgHeight = svg.viewBox.baseVal.height
 
-            // 计算适合容器的缩放比例
             const scaleX = containerWidth / svgWidth
             const scaleY = containerHeight / svgHeight
-            const newScale = Math.min(scaleX, scaleY, 1) // 不超过原始大小
+            const newScale = Math.min(scaleX, scaleY, 1)
 
             setScale(newScale)
             setPosition({ x: 0, y: 0 })
@@ -43,6 +44,17 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             e.preventDefault()
             const delta = e.deltaY > 0 ? 0.9 : 1.1
             setScale(s => Math.min(Math.max(0.1, s * delta), 5))
+
+            // 设置缩放状态
+            setIsZooming(true)
+            // 清除之前的定时器
+            if (zoomTimeout.current) {
+                window.clearTimeout(zoomTimeout.current)
+            }
+            // 设置新的定时器，300ms 后重置缩放状态
+            zoomTimeout.current = window.setTimeout(() => {
+                setIsZooming(false)
+            }, 300)
         }, [])
 
         // 处理拖拽开始
@@ -78,6 +90,15 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
             setScale(s => Math.min(Math.max(0.1, s * delta), 5))
         }, [])
 
+        // 清理定时器
+        useEffect(() => {
+            return () => {
+                if (zoomTimeout.current) {
+                    window.clearTimeout(zoomTimeout.current)
+                }
+            }
+        }, [])
+
         // 添加事件监听
         useEffect(() => {
             const element = actualRef.current
@@ -107,7 +128,6 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                     if (svgElement) {
                         svgElement.style.maxWidth = '100%'
                         svgElement.style.height = 'auto'
-                        // 渲染完成后自动适配大小
                         resetView()
                     }
                 } catch (error) {
@@ -154,7 +174,7 @@ export const Preview = forwardRef<HTMLDivElement, PreviewProps>(
                 <div ref={containerRef} className="flex-1 relative flex items-center justify-center overflow-hidden">
                     <div
                         ref={actualRef}
-                        className="w-full h-full p-4 cursor-move"
+                        className={`w-full h-full p-4 ${isDragging ? 'cursor-grabbing' : isZooming ? 'cursor-zoom-in' : 'cursor-grab'}`}
                         onMouseDown={handleMouseDown}
                         onDoubleClick={handleDoubleClick}
                         style={{
