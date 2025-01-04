@@ -1,12 +1,18 @@
 import React, { useRef, useState } from 'react'
 import ReactDOM from 'react-dom/client'
-import '../styles/globals.css'
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
-import { Editor } from '@/components/editor'
-import { Preview } from '@/components/preview'
+import '@/styles/themes/light.css'
+import '@/styles/themes/dark.css'
+import '@/styles/globals.css'
+import {
+    ResizablePanelGroup,
+    ResizablePanel,
+    ResizableHandle,
+    Editor,
+    Preview,
+    ThemeToggle,
+    ExportButtons
+} from '@/components'
 import { ThemeProvider } from '@/lib/theme-provider'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { ExportButtons } from '@/components/export-buttons'
 import { GitBranch } from 'lucide-react'
 
 const defaultCode = `graph TD
