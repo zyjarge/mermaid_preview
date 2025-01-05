@@ -25,4 +25,22 @@ export interface ExportButtonsProps {
 // 主题切换属性
 export interface ThemeToggleProps extends BaseProps {
     onThemeChange?: (theme: Theme) => void
+}
+
+export type AIProvider = 'openai' | 'claude' | 'kimi' | 'doubao'
+
+export interface EditorProps {
+    value: string
+    onChange: (value: string) => void
+    className?: string
+}
+
+export interface AIProviderInfo {
+    id: AIProvider
+    name: string
+    description: string
+    models?: Array<{
+        id: string
+        name: string
+    }>
 } 

@@ -1,19 +1,14 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import '@/styles/themes/light.css'
 import '@/styles/themes/dark.css'
 import '@/styles/globals.css'
-import {
-    ResizablePanelGroup,
-    ResizablePanel,
-    ResizableHandle,
-    Editor,
-    Preview,
-    ThemeToggle,
-    ExportButtons
-} from '@/components'
+import { EditorTabs } from '@/components/editor-tabs'
+import { Preview } from '@/components/preview'
 import { ThemeProvider } from '@/lib/theme-provider'
 import { GitBranch } from 'lucide-react'
+import { Toaster } from '@/components/ui/toaster'
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 
 const defaultCode = `graph TD
     A[开始] --> B{判断}
@@ -23,7 +18,6 @@ const defaultCode = `graph TD
 
 const Popup = () => {
     const [code, setCode] = useState(defaultCode)
-    const previewRef = useRef<HTMLDivElement>(null)
 
     return (
         <div className="min-h-screen flex flex-col bg-background">
@@ -36,47 +30,21 @@ const Popup = () => {
                                 Mermaid Preview
                             </h1>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <ExportButtons previewRef={previewRef} />
-                            <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
-                            <ThemeToggle />
-                        </div>
                     </div>
                 </div>
             </header>
             <main className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-900">
-                <ResizablePanelGroup
-                    direction="horizontal"
-                    className="h-full bg-white dark:bg-gray-800"
-                >
+                <ResizablePanelGroup direction="horizontal" className="h-full">
                     <ResizablePanel defaultSize={50} minSize={30}>
-                        <div className="h-full flex flex-col">
-                            <div className="border-b px-4 py-2 bg-gray-50 dark:bg-gray-900">
-                                <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    编辑器
-                                </h2>
-                            </div>
-                            <Editor value={code} onChange={setCode} className="flex-1" />
-                        </div>
+                        <EditorTabs value={code} onChange={setCode} />
                     </ResizablePanel>
-                    <ResizableHandle withHandle />
+                    <ResizableHandle />
                     <ResizablePanel defaultSize={50} minSize={30}>
-                        <Preview ref={previewRef} code={code} className="h-full" />
+                        <Preview code={code} />
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </main>
-            <footer className="border-t bg-white dark:bg-gray-900">
-                <div className="w-full">
-                    <div className="flex h-10 items-center justify-between px-4">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                            Mermaid 图表编辑器
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                            拖拽移动 · 滚轮缩放 · 双击重置
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            <Toaster />
         </div>
     )
 }
@@ -87,4 +55,4 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
             <Popup />
         </ThemeProvider>
     </React.StrictMode>
-) 
+)
