@@ -1,0 +1,37 @@
+/* 编辑器特定样式 */
+.editor-container {
+    height: 100%;
+    position: relative;
+}
+
+/* CodeMirror 样式调整 */
+.cm-editor {
+    height: 100% !important;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+}
+
+.cm-editor .cm-scroller {
+    padding: 1rem !important;
+}
+
+/* Mermaid 语法高亮 */
+.cm-keyword {
+    color: #c678dd !important;
+}
+
+.cm-operator {
+    color: #56b6c2 !important;
+}
+
+.cm-bracket {
+    color: #d19a66 !important;
+}
+
+.cm-string {
+    color: #98c379 !important;
+}
+
+.cm-comment {
+    color: #7f848e !important;
+    font-style: italic !important;
+} 

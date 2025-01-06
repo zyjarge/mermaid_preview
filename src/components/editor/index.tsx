@@ -1,6 +1,6 @@
 import CodeMirror from '@uiw/react-codemirror'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { mermaidLanguage } from '@/lib/mermaid-lang'
+import { mermaid } from '@/lib/mermaid-lang'
 import { useTheme } from '@/lib/theme-provider'
 
 interface EditorProps {
@@ -19,7 +19,7 @@ export function Editor({ value, onChange, className }: EditorProps) {
                 onChange={onChange}
                 height="100%"
                 theme={theme === 'dark' ? oneDark : undefined}
-                extensions={[mermaidLanguage()]}
+                extensions={[mermaid()]}
                 basicSetup={{
                     lineNumbers: true,
                     highlightActiveLineGutter: true,
