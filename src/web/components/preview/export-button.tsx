@@ -140,7 +140,7 @@ export function ExportButton({ previewRef }: ExportButtonProps) {
         <Select onValueChange={handleExport}>
             <SelectTrigger className="flex h-9 w-[120px] items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background hover:bg-accent hover:text-accent-foreground">
                 <Download className="h-4 w-4" />
-                <SelectValue placeholder="导出" />
+                <span className="flex-1 text-left">导出</span>
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="png">导出为 PNG</SelectItem>
