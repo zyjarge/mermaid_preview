@@ -59,21 +59,23 @@ export function EditorTabs({ onChange }: EditorTabsProps) {
     }
 
     return (
-        <Tabs defaultValue="editor" className="w-full h-full">
-            <TabsList className="flex w-full">
+        <Tabs defaultValue="editor" className="flex flex-col h-full">
+            <TabsList className="flex w-full shrink-0">
                 <TabsTrigger value="editor" className="flex-1">编辑器</TabsTrigger>
                 <TabsTrigger value="ai" className="flex-1">AI 解释</TabsTrigger>
                 <TabsTrigger value="settings" className="flex-1">设置</TabsTrigger>
             </TabsList>
-            <TabsContent value="editor" className="h-[calc(100%-40px)]">
-                <Editor code={code} onChange={handleCodeChange} />
-            </TabsContent>
-            <TabsContent value="ai">
-                <AIExplanation code={code} />
-            </TabsContent>
-            <TabsContent value="settings">
-                <Settings />
-            </TabsContent>
+            <div className="flex-1 min-h-0">
+                <TabsContent value="editor" className="h-full m-0 data-[state=active]:flex">
+                    <Editor code={code} onChange={handleCodeChange} />
+                </TabsContent>
+                <TabsContent value="ai" className="h-full m-0">
+                    <AIExplanation code={code} />
+                </TabsContent>
+                <TabsContent value="settings" className="h-full m-0">
+                    <Settings />
+                </TabsContent>
+            </div>
         </Tabs>
     )
 } 
