@@ -145,13 +145,12 @@ export function AIExplanation({ code, className }: AIExplanationProps) {
             </CardHeader>
             <CardContent className="flex-1 p-0">
                 <ScrollArea ref={scrollRef} className="h-full">
-                    <div className="space-y-4 p-4">
+                    <div className="space-y-4 p-4 chat-container">
                         {messages.map((message, index) => (
                             message.role !== 'system' && (
                                 <div
                                     key={index}
-                                    className={`flex gap-3 ${message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'
-                                        }`}
+                                    className={`flex gap-3 ${message.role === 'assistant' ? 'flex-row' : 'flex-row-reverse'}`}
                                 >
                                     <Avatar className={message.role === 'assistant' ? 'mt-4' : 'mt-4'}>
                                         <AvatarFallback>
@@ -163,13 +162,12 @@ export function AIExplanation({ code, className }: AIExplanationProps) {
                                         </AvatarFallback>
                                     </Avatar>
                                     <div
-                                        className={`flex flex-col gap-2 ${message.role === 'assistant' ? 'items-start' : 'items-end'
-                                            }`}
+                                        className={`flex flex-col gap-2 ${message.role === 'assistant' ? 'items-start' : 'items-end'}`}
                                     >
                                         <div
-                                            className={`rounded-lg px-4 py-2 max-w-[80%] ${message.role === 'assistant'
-                                                ? 'bg-muted'
-                                                : 'bg-primary text-primary-foreground'
+                                            className={`rounded-lg px-4 py-2 max-w-[80%] shadow-sm ${message.role === 'assistant'
+                                                ? 'bg-chat-other text-chat-text border-2 border-gray-200 dark:border-gray-700'
+                                                : 'bg-chat-self text-chat-text'
                                                 }`}
                                         >
                                             <div className="prose prose-sm dark:prose-invert">
