@@ -1,26 +1,28 @@
-import React, { useState } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { ThemeProvider } from '@core/lib/theme/provider'
+import { ThemeProvider } from '@core/lib/theme-provider'
+import { Preview } from '@core/components/preview'
+import { EditorTabs } from '@core/components/editor-tabs'
 import { Toaster } from '@core/components/ui/toaster'
-import { EditorTabs } from '@web/components/editor-tabs'
-import { Preview } from '@web/components/preview'
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@core/components/ui/resizable'
+import {
+    ResizablePanelGroup,
+    ResizablePanel,
+    ResizableHandle,
+} from '@core/components/ui/resizable'
 
-import '@/styles/globals.css'
+import '@core/styles/globals.css'
 
 function App() {
-    const [code, setCode] = useState('')
-
     return (
-        <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-            <div className="w-[800px] h-[600px] p-4 flex flex-col">
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <div className="container mx-auto p-4">
                 <ResizablePanelGroup direction="horizontal">
                     <ResizablePanel defaultSize={50}>
-                        <EditorTabs onChange={setCode} />
+                        <EditorTabs />
                     </ResizablePanel>
                     <ResizableHandle />
                     <ResizablePanel defaultSize={50}>
-                        <Preview code={code} />
+                        <Preview />
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </div>

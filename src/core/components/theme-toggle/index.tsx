@@ -1,28 +1,40 @@
-import React from 'react'
-import { Sun, Moon } from 'lucide-react'
-import { useTheme } from '@core/lib/theme-provider'
-import type { ThemeToggleProps } from '@core/types'
+import * as React from "react"
+import { Moon, Sun } from "lucide-react"
+import { Button } from "@core/components/ui/button"
+import type { Theme } from "@core/lib/theme-provider"
 
-export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className, onThemeChange }) => {
-    const { theme, setTheme } = useTheme()
+export interface ThemeToggleProps {
+    className?: string
+    onThemeChange?: (theme: Theme) => void
+}
+
+export function ThemeToggle({ className, onThemeChange }: ThemeToggleProps) {
+    const [theme, setTheme] = React.useState<Theme>('dark')
+
+    React.useEffect(() => {
+        const isDark = document.documentElement.classList.contains('dark')
+        const currentTheme = isDark ? 'dark' : 'light'
+        setTheme(currentTheme)
+        onThemeChange?.(currentTheme)
+    }, [onThemeChange])
 
     const toggleTheme = () => {
-        const newTheme = theme === 'dark' ? 'light' : 'dark'
+        const newTheme = theme === 'light' ? 'dark' : 'light'
         setTheme(newTheme)
+        document.documentElement.classList.toggle('dark')
         onThemeChange?.(newTheme)
     }
 
     return (
-        <button
+        <Button
+            variant="outline"
+            size="icon"
+            className={className}
             onClick={toggleTheme}
-            className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 ${className || ''}`}
-            title={`切换到${theme === 'dark' ? '浅色' : '深色'}主题`}
         >
-            {theme === 'dark' ? (
-                <Sun className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            ) : (
-                <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
-            )}
-        </button>
+            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+            <span className="sr-only">Toggle theme</span>
+        </Button>
     )
 } 
