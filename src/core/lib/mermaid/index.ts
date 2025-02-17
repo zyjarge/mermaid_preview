@@ -1,26 +1,45 @@
 import mermaid from 'mermaid'
 
-// 初始化mermaid配置
+// 初始化 mermaid 配置
 mermaid.initialize({
-  startOnLoad: true,
+  startOnLoad: false,
   theme: 'default',
   securityLevel: 'loose',
   fontFamily: 'monospace',
-  // 禁用动画以提高性能
-  sequence: {
-    diagramMarginX: 50,
-    diagramMarginY: 10,
-    actorMargin: 50,
-    width: 150,
-    height: 65,
-    boxMargin: 10,
-    boxTextMargin: 5,
-    noteMargin: 10,
-    messageMargin: 35,
-    mirrorActors: true,
-    bottomMarginAdj: 1,
-    useMaxWidth: true,
-  }
+  logLevel: 'debug',
+  darkMode: false
 })
+
+interface RenderOptions {
+  theme?: 'default' | 'dark' | 'neutral' | 'forest'
+}
+
+interface RenderResult {
+  svg: string
+  bindFunctions?: (element: Element) => void
+}
+
+export async function render(id: string, code: string, options: RenderOptions = {}): Promise<RenderResult> {
+  try {
+    console.log('Rendering mermaid diagram:', { id, code, options })
+    
+    // 更新配置
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: options.theme || 'default',
+      securityLevel: 'loose',
+      fontFamily: 'monospace',
+      logLevel: 'debug',
+      darkMode: options.theme === 'dark'
+    })
+
+    const { svg, bindFunctions } = await mermaid.render(id, code)
+    console.log('Render successful:', { svg: svg.substring(0, 100) + '...' })
+    return { svg, bindFunctions }
+  } catch (error) {
+    console.error('Failed to render mermaid diagram:', error)
+    throw error
+  }
+}
 
 export { mermaid } 

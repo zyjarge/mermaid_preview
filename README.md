@@ -55,29 +55,6 @@
 
 ## 安装说明
 
-### 本地开发
-
-1. 克隆项目
-```bash
-git clone https://github.com/zyjarge/mermaid_preview.git
-cd mermaid_preview
-```
-
-2. 安装依赖
-```bash
-npm install
-```
-
-3. 启动开发服务器
-```bash
-npm run dev
-```
-
-4. 构建扩展
-```bash
-npm run build
-```
-
 ### 在 Chrome 中安装
 
 1. 打开 Chrome 浏览器

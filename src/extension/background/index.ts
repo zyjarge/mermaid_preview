@@ -7,11 +7,7 @@ chrome.runtime.onInstalled.addListener(() => {
 })
 
 // 监听来自content script的消息
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'GET_THEME') {
-    chrome.storage.local.get('theme', (result) => {
-      sendResponse(result.theme || 'system')
-    })
-    return true
-  }
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  console.log('Background script received message:', message)
+  sendResponse({ status: 'ok' })
 }) 
