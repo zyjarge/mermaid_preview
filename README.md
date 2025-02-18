@@ -4,12 +4,14 @@
 
 ## 功能特点
 
-- 🎨 实时预览 Mermaid 图表
+- 🎨 实时预览 Mermaid 图表、Markdown代码
 - 🔄 自动适配预览大小
 - 🎯 支持拖拽和缩放
-- 💾 多格式导出（PNG、JPG、PDF）
+- 💾 多格式导出
+  - Mermaid：（PNG、JPG、PDF）
+  - Markdonw：HTML
 - 🌓 深色/浅色主题切换
-- 🤖 AI 智能解析（即将推出）
+
 
 ## 项目依赖
 
