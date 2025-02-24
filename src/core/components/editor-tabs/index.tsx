@@ -6,9 +6,11 @@ import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { noctisLilac } from 'thememirror'
 import type { Theme } from '@core/lib/theme-provider'
+import { CodeDetector } from '@core/lib/code-detector'
+import type { CodeType } from '../../lib/code-detector'
 
 interface EditorTabsProps {
-    onChange?: (value: string) => void
+    onChange?: (value: string, type: CodeType) => void
     className?: string
     defaultValue?: string
 }
@@ -22,11 +24,14 @@ const DEFAULT_CODE = `graph TD
 
 export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE }: EditorTabsProps) {
     const [code, setCode] = useState(defaultValue)
+    const [codeType, setCodeType] = useState<CodeType>('markdown')
     const [theme, setTheme] = useState<Theme>('light')
 
     useEffect(() => {
-        // 初始化时触发一次 onChange
-        onChange?.(code)
+        // 初始化时触发一次 onChange，并检测代码类型
+        const type = CodeDetector.detect(code)
+        setCodeType(type)
+        onChange?.(code, type)
     }, []) // 仅在组件挂载时执行一次
 
     useEffect(() => {
@@ -51,9 +56,20 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
         return () => observer.disconnect()
     }, [])
 
+    useEffect(() => {
+        console.log(codeType); // 示例用法，实际应根据业务需求使用
+    }, [codeType])
+
     const handleChange = (value: string) => {
         setCode(value)
-        onChange?.(value)
+        const type = CodeDetector.detect(value)
+        setCodeType(type)
+        onChange?.(value, type)
+    }
+
+    const handleTabClick = (type: CodeType) => {
+        setCodeType(type)
+        onChange?.(code, type)
     }
 
     return (
@@ -82,6 +98,11 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
                     </div>
                 </TabsContent>
             </Tabs>
+            <div>
+                <button onClick={() => handleTabClick('markdown')}>
+                    Switch to markdown
+                </button>
+            </div>
         </Card>
     )
 } 

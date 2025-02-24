@@ -5,13 +5,16 @@ import { useToast } from '@core/components/ui/use-toast'
 import { ZoomControls } from '@core/components/shared/zoom-controls'
 import { ExportButtons } from '@core/components/shared/export-buttons'
 import type { Theme } from '@core/lib/theme-provider'
+import { CodeType } from '@core/lib/code-detector'
+import { MarkdownPreview } from '@core/components/markdown-preview'
 
 interface PreviewProps {
     className?: string
     code?: string
+    codeType?: CodeType
 }
 
-export function Preview({ className = '', code = '' }: PreviewProps) {
+export function Preview({ className = '', code = '', codeType = 'unknown' }: PreviewProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -27,6 +30,7 @@ export function Preview({ className = '', code = '' }: PreviewProps) {
 
     useEffect(() => {
         if (!code || !containerRef.current) return
+        if (codeType !== 'mermaid') return
 
         const renderDiagram = async () => {
             try {
@@ -51,7 +55,7 @@ export function Preview({ className = '', code = '' }: PreviewProps) {
         }
 
         renderDiagram()
-    }, [code, theme, toast])
+    }, [code, theme, toast, codeType])
 
     const handleThemeChange = (newTheme: Theme) => {
         setTheme(newTheme)
@@ -73,6 +77,7 @@ export function Preview({ className = '', code = '' }: PreviewProps) {
     }
 
     const handleWheel = (e: React.WheelEvent) => {
+        if (codeType === 'markdown') return
         e.preventDefault()
         const delta = e.deltaY > 0 ? 0.9 : 1.1
         const rect = containerRef.current?.getBoundingClientRect()
@@ -92,6 +97,7 @@ export function Preview({ className = '', code = '' }: PreviewProps) {
     }
 
     const handleMouseDown = (e: React.MouseEvent) => {
+        if (codeType === 'markdown') return
         e.preventDefault()
         setIsDragging(true)
         setDragStart({
@@ -101,7 +107,7 @@ export function Preview({ className = '', code = '' }: PreviewProps) {
     }
 
     const handleMouseMove = (e: React.MouseEvent) => {
-        if (!isDragging) return
+        if (!isDragging || codeType === 'markdown') return
         e.preventDefault()
         setPosition({
             x: e.clientX - dragStart.x,
@@ -125,26 +131,32 @@ export function Preview({ className = '', code = '' }: PreviewProps) {
                 <ExportButtons 
                     targetRef={containerRef}
                     onThemeChange={handleThemeChange}
+                    codeType={codeType}
+                    code={code}
                 />
             </div>
             <div
-                className="flex-1 relative overflow-hidden"
+                className="flex-1 relative overflow-auto"
                 onWheel={handleWheel}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                style={{ cursor: codeType === 'mermaid' ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
             >
-                <div
-                    ref={containerRef}
-                    className="absolute"
-                    style={{
-                        transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-                        transformOrigin: '0 0',
-                        transition: isDragging ? 'none' : 'transform 0.1s'
-                    }}
-                />
+                {codeType === 'markdown' ? (
+                    <MarkdownPreview code={code} />
+                ) : (
+                    <div
+                        ref={containerRef}
+                        className="absolute"
+                        style={{
+                            transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                            transformOrigin: '0 0',
+                            transition: isDragging ? 'none' : 'transform 0.1s'
+                        }}
+                    />
+                )}
             </div>
         </div>
     )
