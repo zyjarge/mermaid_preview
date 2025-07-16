@@ -46,9 +46,10 @@ export function Preview({ className = '', code = '', codeType = 'unknown' }: Pre
                 }
             } catch (error) {
                 console.error('Failed to render diagram:', error)
+                const errorMessage = error instanceof Error ? error.message : '图表语法可能有误，请检查后重试'
                 toast({
                     title: '渲染失败',
-                    description: '图表语法可能有误，请检查后重试',
+                    description: errorMessage,
                     variant: 'destructive',
                 })
             }
