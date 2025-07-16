@@ -108,6 +108,51 @@ export function Settings({ className = '' }: SettingsProps) {
     setConfig(prev => ({ ...prev, ...updates }))
   }
 
+  // 当AI服务商改变时，更新默认配置
+  const handleProviderChange = (provider: AIConfig['provider']) => {
+    let defaultConfig: Partial<AIConfig> = { provider }
+    
+    switch (provider) {
+      case 'deepseek':
+        defaultConfig = {
+          ...defaultConfig,
+          baseUrl: 'https://api.deepseek.com/v1',
+          model: 'deepseek-chat'
+        }
+        break
+      case 'kimi':
+        defaultConfig = {
+          ...defaultConfig,
+          baseUrl: 'https://api.moonshot.cn/v1',
+          model: 'moonshot-v1-8k'
+        }
+        break
+      case 'openai':
+        defaultConfig = {
+          ...defaultConfig,
+          baseUrl: 'https://api.openai.com/v1',
+          model: 'gpt-3.5-turbo'
+        }
+        break
+      case 'claude':
+        defaultConfig = {
+          ...defaultConfig,
+          baseUrl: 'https://api.anthropic.com/v1',
+          model: 'claude-3-sonnet-20240229'
+        }
+        break
+      case 'zhipu':
+        defaultConfig = {
+          ...defaultConfig,
+          baseUrl: 'https://open.bigmodel.cn/api/paas/v4',
+          model: 'glm-4'
+        }
+        break
+    }
+    
+    updateConfig(defaultConfig)
+  }
+
   if (isLoading) {
     return (
       <div className={`h-full flex items-center justify-center ${className}`}>
@@ -134,11 +179,12 @@ export function Settings({ className = '' }: SettingsProps) {
           {/* AI服务商选择 */}
           <div className="space-y-2">
             <Label htmlFor="provider">AI服务商</Label>
-            <Select value={config.provider} onValueChange={(value: any) => updateConfig({ provider: value })}>
+            <Select value={config.provider} onValueChange={handleProviderChange}>
               <SelectTrigger>
                 <SelectValue placeholder="选择AI服务商" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="deepseek">DeepSeek</SelectItem>
                 <SelectItem value="kimi">Kimi (月之暗面)</SelectItem>
                 <SelectItem value="openai">OpenAI</SelectItem>
                 <SelectItem value="claude">Claude</SelectItem>

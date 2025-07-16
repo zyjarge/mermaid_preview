@@ -1,5 +1,6 @@
 import { AIService, AIProvider } from './types'
 import { KimiAIService } from './kimi'
+import { DeepSeekAIService } from './deepseek'
 import { AIConfig } from '@core/types'
 
 export class AIServiceFactory {
@@ -25,6 +26,20 @@ export class AIServiceFactory {
                     this.services.set(provider, new KimiAIService(config))
                 } else {
                     this.services.set(provider, new KimiAIService({
+                        apiKey: config.apiKey,
+                        baseUrl: config.baseUrl,
+                        model: config.model,
+                        temperature: config.temperature,
+                        maxTokens: config.maxTokens
+                    }))
+                }
+                break
+            case 'deepseek':
+                if (typeof config === 'string') {
+                    // 向后兼容：支持只传入apiKey的情况
+                    this.services.set(provider, new DeepSeekAIService(config))
+                } else {
+                    this.services.set(provider, new DeepSeekAIService({
                         apiKey: config.apiKey,
                         baseUrl: config.baseUrl,
                         model: config.model,
