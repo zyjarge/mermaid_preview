@@ -1,5 +1,5 @@
 // AI 提供商类型
-export type AIProvider = 'kimi' | 'openai' | 'claude' | 'zhipu'
+export type AIProvider = 'kimi' | 'openai' | 'claude' | 'zhipu' | 'deepseek'
 
 // 消息角色
 export type MessageRole = 'user' | 'assistant' | 'system'
