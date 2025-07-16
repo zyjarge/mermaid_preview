@@ -8,6 +8,7 @@ import { Toaster } from '@core/components/ui/toaster'
 import '@core/styles/globals.css'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@core/components/ui/resizable'
 import { CodeType } from './core/lib/code-detector'
+import { CodeDetector } from './core/lib/code-detector'
 
 function App() {
     const [code, setCode] = useState(`graph TD
@@ -23,6 +24,12 @@ function App() {
         setCodeType(type)
     }
 
+    const handleFixError = (fixedCode: string) => {
+        setCode(fixedCode)
+        const type = CodeDetector.detect(fixedCode)
+        setCodeType(type)
+    }
+
     return (
         <ThemeProvider>
             <div className="min-h-screen bg-background">
@@ -30,7 +37,7 @@ function App() {
                     <div className="flex-1 flex flex-col">
                         <ResizablePanelGroup direction="horizontal" className="flex-1">
                             <ResizablePanel defaultSize={30}>
-                                <EditorTabs className="h-full" onChange={handleCodeChange} />
+                                <EditorTabs className="h-full" onChange={handleCodeChange} onFixError={handleFixError} />
                             </ResizablePanel>
                             <ResizableHandle />
                             <ResizablePanel defaultSize={70}>

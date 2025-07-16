@@ -1,3 +1,5 @@
+import { AIConfig } from '@core/types'
+
 // 存储键名前缀
 const STORAGE_PREFIX = 'mermaid_preview_'
 
@@ -6,6 +8,7 @@ export interface StorageData {
   apiProvider?: string
   apiKey?: string
   theme?: string
+  aiConfig?: AIConfig
   [key: string]: any
 }
 

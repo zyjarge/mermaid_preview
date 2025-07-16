@@ -46,9 +46,10 @@ export function Preview({ className = '', code = '', codeType = 'unknown' }: Pre
                 }
             } catch (error) {
                 console.error('Failed to render diagram:', error)
+                const errorMessage = error instanceof Error ? error.message : '图表语法可能有误，请检查后重试'
                 toast({
                     title: '渲染失败',
-                    description: '图表语法可能有误，请检查后重试',
+                    description: errorMessage,
                     variant: 'destructive',
                 })
             }
@@ -62,7 +63,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown' }: Pre
     }
 
     const handleZoomIn = () => {
-        setScale(prev => Math.min(4, prev * 1.2))
+        setScale(prev => Math.min(10, prev * 1.2))
         setPosition({ x: 0, y: 0 })
     }
 
@@ -86,7 +87,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown' }: Pre
         const mouseX = e.clientX - rect.left
         const mouseY = e.clientY - rect.top
 
-        const newScale = Math.max(0.25, Math.min(4, scale * delta))
+        const newScale = Math.max(0.25, Math.min(10, scale * delta))
         const scaleChange = newScale / scale
 
         const newX = position.x - (mouseX * (scaleChange - 1))

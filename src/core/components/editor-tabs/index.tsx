@@ -1,18 +1,26 @@
 import { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@core/components/ui/tabs'
 import { Card } from '@core/components/ui/card'
+import { Button } from '@core/components/ui/button'
+import { Settings } from '@core/components/settings'
 import CodeMirror from '@uiw/react-codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { noctisLilac } from 'thememirror'
+import { Bot, Loader2 } from 'lucide-react'
 import type { Theme } from '@core/lib/theme-provider'
 import { CodeDetector } from '@core/lib/code-detector'
 import type { CodeType } from '../../lib/code-detector'
+import { useToast } from '@core/components/ui/use-toast'
+import { getStorageData } from '@core/lib/storage'
+import { AIConfig, DEFAULT_AI_CONFIG } from '@core/types'
+import { AIServiceFactory } from '@core/lib/ai/factory'
 
 interface EditorTabsProps {
     onChange?: (value: string, type: CodeType) => void
     className?: string
     defaultValue?: string
+    onFixError?: (fixedCode: string) => void
 }
 
 const DEFAULT_CODE = `graph TD
@@ -22,10 +30,12 @@ const DEFAULT_CODE = `graph TD
     C -->|Two| E[iPhone]
     C -->|Three| F[Car]`
 
-export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE }: EditorTabsProps) {
+export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError }: EditorTabsProps) {
     const [code, setCode] = useState(defaultValue)
     const [codeType, setCodeType] = useState<CodeType>('markdown')
     const [theme, setTheme] = useState<Theme>('light')
+    const [isFixing, setIsFixing] = useState(false)
+    const { toast } = useToast()
 
     useEffect(() => {
         // 初始化时触发一次 onChange，并检测代码类型
@@ -56,10 +66,6 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
         return () => observer.disconnect()
     }, [])
 
-    useEffect(() => {
-        console.log(codeType); // 示例用法，实际应根据业务需求使用
-    }, [codeType])
-
     const handleChange = (value: string) => {
         setCode(value)
         const type = CodeDetector.detect(value)
@@ -67,9 +73,97 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
         onChange?.(value, type)
     }
 
-    const handleTabClick = (type: CodeType) => {
-        setCodeType(type)
-        onChange?.(code, type)
+    // AI修复功能
+    const handleAIFix = async () => {
+        if (!code.trim()) {
+            toast({
+                title: '请输入代码',
+                description: '需要代码内容才能进行AI修复',
+                variant: 'destructive'
+            })
+            return
+        }
+
+        if (codeType !== 'mermaid') {
+            toast({
+                title: '仅支持Mermaid代码修复',
+                description: '当前仅支持对Mermaid图表代码进行AI修复',
+                variant: 'destructive'
+            })
+            return
+        }
+
+        setIsFixing(true)
+        try {
+            // 获取AI配置
+            const storageData = await getStorageData()
+            const aiConfig: AIConfig = { ...DEFAULT_AI_CONFIG, ...storageData.aiConfig }
+            
+            if (!aiConfig.apiKey) {
+                toast({
+                    title: '请配置API Key',
+                    description: '请在设置中配置AI服务的API Key',
+                    variant: 'destructive'
+                })
+                return
+            }
+
+            // 初始化AI服务
+            const aiFactory = AIServiceFactory.getInstance()
+            aiFactory.registerService(aiConfig.provider, aiConfig)
+            const aiService = aiFactory.getService(aiConfig.provider)
+
+            // 构造修复提示
+            const systemMessage = {
+                role: 'system' as const,
+                content: aiConfig.prompt || DEFAULT_AI_CONFIG.prompt!,
+                timestamp: Date.now()
+            }
+
+            const userMessage = {
+                role: 'user' as const,
+                content: `请修复以下Mermaid代码中的错误：\n\n${code}`,
+                timestamp: Date.now()
+            }
+
+            // 调用AI服务
+            const response = await aiService.chat([systemMessage, userMessage])
+            const fixedCode = response.message.content
+
+            // 提取代码块（如果AI返回的是包含代码块的内容）
+            const codeBlockMatch = fixedCode.match(/```(?:mermaid)?\n([\s\S]*?)\n```/)
+            const extractedCode = codeBlockMatch ? codeBlockMatch[1] : fixedCode
+
+            // 更新代码
+            const trimmedCode = extractedCode.trim()
+            if (trimmedCode) {
+                setCode(trimmedCode)
+                const type = CodeDetector.detect(trimmedCode)
+                setCodeType(type)
+                onChange?.(trimmedCode, type)
+                onFixError?.(trimmedCode)
+                
+                toast({
+                    title: 'AI修复完成',
+                    description: '代码已修复，请查看结果'
+                })
+            } else {
+                toast({
+                    title: 'AI修复失败',
+                    description: '未能获取有效的修复代码',
+                    variant: 'destructive'
+                })
+            }
+        } catch (error) {
+            console.error('AI修复失败:', error)
+            toast({
+                title: 'AI修复失败',
+                description: error instanceof Error ? error.message : '未知错误',
+                variant: 'destructive'
+            })
+        } finally {
+            setIsFixing(false)
+        }
     }
 
     return (
@@ -77,32 +171,46 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
             <Tabs defaultValue="editor" className="flex-1 flex flex-col">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="editor">编辑器</TabsTrigger>
+                    <TabsTrigger value="settings">设置</TabsTrigger>
                 </TabsList>
-                <TabsContent value="editor" className="flex-1 p-0">
-                    <CodeMirror
-                        value={code}
-                        height="100%"
-                        extensions={[markdown()]}
-                        theme={theme === 'dark' ? oneDark : noctisLilac}
-                        onChange={handleChange}
-                        className="h-full"
-                    />
-                </TabsContent>
-                <TabsContent value="examples" className="flex-1 p-4 overflow-auto">
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold">示例图表</h3>
-                        <p className="text-sm text-muted-foreground">
-                            点击示例代码将自动复制到编辑器中。
-                        </p>
-                        {/* TODO: Add example diagrams */}
+                <TabsContent value="editor" className="flex-1 flex flex-col p-0">
+                    <div className="flex-1">
+                        <CodeMirror
+                            value={code}
+                            height="100%"
+                            extensions={[markdown()]}
+                            theme={theme === 'dark' ? oneDark : noctisLilac}
+                            onChange={handleChange}
+                            className="h-full"
+                        />
+                    </div>
+                    {/* AI修复按钮 */}
+                    <div className="p-3 border-t bg-muted/20">
+                        <Button 
+                            onClick={handleAIFix}
+                            disabled={isFixing}
+                            variant="outline"
+                            size="sm"
+                            className="w-full"
+                        >
+                            {isFixing ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    AI修复中...
+                                </>
+                            ) : (
+                                <>
+                                    <Bot className="mr-2 h-4 w-4" />
+                                    使用AI修复
+                                </>
+                            )}
+                        </Button>
                     </div>
                 </TabsContent>
+                <TabsContent value="settings" className="flex-1 p-0">
+                    <Settings />
+                </TabsContent>
             </Tabs>
-            <div>
-                <button onClick={() => handleTabClick('markdown')}>
-                    Switch to markdown
-                </button>
-            </div>
         </Card>
     )
 } 

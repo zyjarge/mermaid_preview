@@ -1,45 +1,76 @@
 import { AIService, AIResponse, ChatMessage } from './types'
 
+interface KimiAIConfig {
+    apiKey: string
+    baseUrl?: string
+    model?: string
+    temperature?: number
+    maxTokens?: number
+}
+
 export class KimiAIService implements AIService {
     private readonly apiKey: string
-    private readonly apiEndpoint = 'https://api.moonshot.cn/v1/chat/completions'
+    private readonly apiEndpoint: string
+    private readonly model: string
+    private readonly temperature: number
+    private readonly maxTokens: number
 
-    constructor(apiKey: string) {
-        this.apiKey = apiKey
+    constructor(config: KimiAIConfig | string) {
+        if (typeof config === 'string') {
+            // 向后兼容：支持只传入apiKey的情况
+            this.apiKey = config
+            this.apiEndpoint = 'https://api.moonshot.cn/v1/chat/completions'
+            this.model = 'moonshot-v1-8k'
+            this.temperature = 0.7
+            this.maxTokens = 1000
+        } else {
+            this.apiKey = config.apiKey
+            this.apiEndpoint = config.baseUrl 
+                ? `${config.baseUrl}/chat/completions`
+                : 'https://api.moonshot.cn/v1/chat/completions'
+            this.model = config.model || 'moonshot-v1-8k'
+            this.temperature = config.temperature || 0.7
+            this.maxTokens = config.maxTokens || 1000
+        }
     }
 
     async chat(messages: ChatMessage[]): Promise<AIResponse> {
-        const response = await fetch(this.apiEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.apiKey}`
-            },
-            body: JSON.stringify({
-                model: 'moonshot-v1-8k',
-                messages: messages.map(({ role, content }) => ({
-                    role,
-                    content
-                })),
-                temperature: 0.7,
-                max_tokens: 1000
+        try {
+            const response = await fetch(this.apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: JSON.stringify({
+                    model: this.model,
+                    messages: messages.map(({ role, content }) => ({
+                        role,
+                        content
+                    })),
+                    temperature: this.temperature,
+                    max_tokens: this.maxTokens
+                })
             })
-        })
 
-        if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.error?.message || '请求失败')
-        }
-
-        const result = await response.json()
-        const content = result.choices?.[0]?.message?.content || '无法生成回复'
-
-        return {
-            message: {
-                role: 'assistant',
-                content,
-                timestamp: Date.now()
+            if (!response.ok) {
+                const error = await response.json()
+                throw new Error(error.error?.message || `请求失败 (${response.status})`)
             }
+
+            const result = await response.json()
+            const content = result.choices?.[0]?.message?.content || '无法生成回复'
+
+            return {
+                message: {
+                    role: 'assistant',
+                    content,
+                    timestamp: Date.now()
+                }
+            }
+        } catch (error) {
+            console.error('Kimi AI服务调用失败:', error)
+            throw error
         }
     }
 
