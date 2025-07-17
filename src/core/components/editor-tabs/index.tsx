@@ -22,6 +22,7 @@ interface EditorTabsProps {
     defaultValue?: string
     onFixError?: (fixedCode: string) => void
     onError?: (error: string | null) => void
+    currentError?: string | null
 }
 
 const DEFAULT_CODE = `graph TD
@@ -31,7 +32,7 @@ const DEFAULT_CODE = `graph TD
     C -->|Two| E[iPhone]
     C -->|Three| F[Car]`
 
-export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError, onError }: EditorTabsProps) {
+export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError, onError, currentError }: EditorTabsProps) {
     const [code, setCode] = useState(defaultValue)
     const [codeType, setCodeType] = useState<CodeType>('markdown')
     const [theme, setTheme] = useState<Theme>('light')
@@ -124,9 +125,27 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
                 timestamp: Date.now()
             }
 
+            // 构造包含错误信息的用户消息
+            let userContent = `请修复以下Mermaid代码中的错误：\n\n${code}`
+            
+            // 如果有具体错误信息，添加到提示中
+            if (currentError) {
+                userContent = `请修复以下Mermaid代码中的错误：
+
+错误信息：
+${currentError}
+
+需要修复的代码：
+\`\`\`mermaid
+${code}
+\`\`\`
+
+请仔细分析错误信息，特别注意行号和具体的语法错误，然后提供修复后的完整代码。`
+            }
+
             const userMessage = {
                 role: 'user' as const,
-                content: `请修复以下Mermaid代码中的错误：\n\n${code}`,
+                content: userContent,
                 timestamp: Date.now()
             }
 
