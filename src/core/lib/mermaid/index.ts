@@ -83,9 +83,19 @@ export async function render(id: string, code: string, options: RenderOptions = 
     return { svg, bindFunctions }
   } catch (error) {
     console.error('Failed to render mermaid diagram:', error)
+    
+    // 保留原始错误信息，同时提供用户友好的描述
     const detailedError = parseMermaidError(error)
     const enhancedError = new Error(detailedError)
     enhancedError.name = 'MermaidRenderError'
+    
+    // 保存原始错误信息以便详细分析
+    ;(enhancedError as any).originalError = error
+    ;(enhancedError as any).originalMessage = error instanceof Error ? error.message : String(error)
+    
+    console.log('Original error message:', error instanceof Error ? error.message : String(error))
+    console.log('Enhanced error message:', detailedError)
+    
     throw enhancedError
   }
 }

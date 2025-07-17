@@ -12,9 +12,10 @@ interface PreviewProps {
     className?: string
     code?: string
     codeType?: CodeType
+    onError?: (error: string | null) => void
 }
 
-export function Preview({ className = '', code = '', codeType = 'unknown' }: PreviewProps) {
+export function Preview({ className = '', code = '', codeType = 'unknown', onError }: PreviewProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -29,8 +30,14 @@ export function Preview({ className = '', code = '', codeType = 'unknown' }: Pre
     }, [])
 
     useEffect(() => {
-        if (!code || !containerRef.current) return
-        if (codeType !== 'mermaid') return
+        if (!code || !containerRef.current) {
+            onError?.(null) // 清除错误信息
+            return
+        }
+        if (codeType !== 'mermaid') {
+            onError?.(null) // 清除错误信息
+            return
+        }
 
         const renderDiagram = async () => {
             try {
@@ -44,19 +51,49 @@ export function Preview({ className = '', code = '', codeType = 'unknown' }: Pre
                         svgElement.style.background = 'transparent'
                     }
                 }
+                // 渲染成功，清除错误信息
+                onError?.(null)
             } catch (error) {
                 console.error('Failed to render diagram:', error)
-                const errorMessage = error instanceof Error ? error.message : '图表语法可能有误，请检查后重试'
-                toast({
-                    title: '渲染失败',
-                    description: errorMessage,
-                    variant: 'destructive',
-                })
+                // 优先使用原始错误信息，如果没有则使用 message
+                let errorMsg = '图表语法可能有误，请检查后重试'
+                
+                if (error instanceof Error) {
+                    // 检查是否有原始错误信息（来自我们的增强错误）
+                    const originalMessage = (error as any).originalMessage
+                    if (originalMessage) {
+                        errorMsg = originalMessage
+                        console.log('Using original error message:', errorMsg)
+                    } else {
+                        errorMsg = error.message || error.toString()
+                        console.log('Using error message:', errorMsg)
+                    }
+                }
+                
+                // 将错误信息传递给父组件
+                onError?.(errorMsg)
+                
+                // 在预览区域显示简化的错误信息
+                if (containerRef.current) {
+                    containerRef.current.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full p-8 text-center">
+                            <div class="bg-destructive/10 border border-destructive/20 rounded-lg p-6 max-w-md">
+                                <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-destructive/20 rounded-full">
+                                    <svg class="w-6 h-6 text-destructive" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-semibold text-destructive mb-2">语法错误</h3>
+                                <p class="text-sm text-muted-foreground">Mermaid 代码存在语法错误，请检查代码框下方的详细错误信息</p>
+                            </div>
+                        </div>
+                    `
+                }
             }
         }
 
         renderDiagram()
-    }, [code, theme, toast, codeType])
+    }, [code, theme, toast, codeType, onError])
 
     const handleThemeChange = (newTheme: Theme) => {
         setTheme(newTheme)

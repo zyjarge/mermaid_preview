@@ -7,7 +7,7 @@ import CodeMirror from '@uiw/react-codemirror'
 import { markdown } from '@codemirror/lang-markdown'
 import { oneDark } from '@codemirror/theme-one-dark'
 import { noctisLilac } from 'thememirror'
-import { Bot, Loader2 } from 'lucide-react'
+import { Bot } from 'lucide-react'
 import type { Theme } from '@core/lib/theme-provider'
 import { CodeDetector } from '@core/lib/code-detector'
 import type { CodeType } from '../../lib/code-detector'
@@ -21,6 +21,7 @@ interface EditorTabsProps {
     className?: string
     defaultValue?: string
     onFixError?: (fixedCode: string) => void
+    onError?: (error: string | null) => void
 }
 
 const DEFAULT_CODE = `graph TD
@@ -30,7 +31,7 @@ const DEFAULT_CODE = `graph TD
     C -->|Two| E[iPhone]
     C -->|Three| F[Car]`
 
-export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError }: EditorTabsProps) {
+export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError, onError }: EditorTabsProps) {
     const [code, setCode] = useState(defaultValue)
     const [codeType, setCodeType] = useState<CodeType>('markdown')
     const [theme, setTheme] = useState<Theme>('light')
@@ -71,6 +72,9 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
         const type = CodeDetector.detect(value)
         setCodeType(type)
         onChange?.(value, type)
+        
+        // 清除之前的错误信息
+        onError?.(null)
     }
 
     // AI修复功能
@@ -142,6 +146,7 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
                 setCodeType(type)
                 onChange?.(trimmedCode, type)
                 onFixError?.(trimmedCode)
+                onError?.(null) // 清除错误信息
                 
                 toast({
                     title: 'AI修复完成',
@@ -185,26 +190,30 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
                         />
                     </div>
                     {/* AI修复按钮 */}
-                    <div className="p-3 border-t bg-muted/20">
+                    <div className="p-3 border-t bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950/30 dark:via-blue-950/30 dark:to-indigo-950/30">
                         <Button 
                             onClick={handleAIFix}
                             disabled={isFixing}
-                            variant="outline"
                             size="sm"
-                            className="w-full"
+                            className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
                         >
                             {isFixing ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    AI修复中...
+                                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                                    AI智能修复中...
                                 </>
                             ) : (
                                 <>
                                     <Bot className="mr-2 h-4 w-4" />
-                                    使用AI修复
+                                    ✨ AI智能修复
                                 </>
                             )}
                         </Button>
+                        <div className="mt-2 text-center">
+                            <span className="text-xs text-muted-foreground">
+                                智能检测语法错误并自动修复
+                            </span>
+                        </div>
                     </div>
                 </TabsContent>
                 <TabsContent value="settings" className="flex-1 p-0">
