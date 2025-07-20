@@ -18,6 +18,7 @@ interface PreviewProps {
 export function Preview({ className = '', code = '', codeType = 'unknown', onError }: PreviewProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
+    const [autoFitScale, setAutoFitScale] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [isDragging, setIsDragging] = useState(false)
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
@@ -49,6 +50,49 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
                     const svgElement = containerRef.current.querySelector('svg')
                     if (svgElement) {
                         svgElement.style.background = 'transparent'
+                        
+                        // 计算自适应缩放比例
+                        const calculateAutoFitScale = () => {
+                            const parent = containerRef.current?.parentElement
+                            if (!parent || !svgElement) return 1
+                            
+                            const parentRect = parent.getBoundingClientRect()
+                            const svgRect = svgElement.getBoundingClientRect()
+                            
+                            // 减去一些边距以避免滚动条
+                            const availableWidth = parentRect.width - 20
+                            const availableHeight = parentRect.height - 20
+                            
+                            const scaleX = availableWidth / svgRect.width
+                            const scaleY = availableHeight / svgRect.height
+                            
+                            // 使用较小的缩放比例以确保完全显示，移除100%限制
+                            return Math.min(scaleX, scaleY)
+                        }
+                        
+                        // 延迟计算以确保DOM已更新
+                        setTimeout(() => {
+                            const autoScale = calculateAutoFitScale()
+                            setAutoFitScale(autoScale)
+                            setScale(autoScale)
+                            
+                            // 计算居中位置
+                            const parent = containerRef.current?.parentElement
+                            if (parent && svgElement) {
+                                const parentRect = parent.getBoundingClientRect()
+                                const svgRect = svgElement.getBoundingClientRect()
+                                
+                                const scaledWidth = svgRect.width * autoScale
+                                const scaledHeight = svgRect.height * autoScale
+                                
+                                const centerX = (parentRect.width - scaledWidth) / 2
+                                const centerY = (parentRect.height - scaledHeight) / 2
+                                
+                                setPosition({ x: centerX, y: centerY })
+                            } else {
+                                setPosition({ x: 0, y: 0 })
+                            }
+                        }, 100)
                     }
                 }
                 // 渲染成功，清除错误信息
@@ -110,8 +154,28 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     }
 
     const handleReset = () => {
-        setScale(1)
-        setPosition({ x: 0, y: 0 })
+        setScale(autoFitScale)
+        
+        // 重置时也需要重新计算居中位置
+        if (containerRef.current) {
+            const parent = containerRef.current.parentElement
+            const svgElement = containerRef.current.querySelector('svg')
+            
+            if (parent && svgElement) {
+                const parentRect = parent.getBoundingClientRect()
+                const svgRect = svgElement.getBoundingClientRect()
+                
+                const scaledWidth = svgRect.width * autoFitScale
+                const scaledHeight = svgRect.height * autoFitScale
+                
+                const centerX = (parentRect.width - scaledWidth) / 2
+                const centerY = (parentRect.height - scaledHeight) / 2
+                
+                setPosition({ x: centerX, y: centerY })
+            } else {
+                setPosition({ x: 0, y: 0 })
+            }
+        }
     }
 
     const handleWheel = (e: React.WheelEvent) => {
