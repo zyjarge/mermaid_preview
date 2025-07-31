@@ -30,7 +30,29 @@ const DEFAULT_CODE = `graph TD
     B --> C{Let me think}
     C -->|One| D[Laptop]
     C -->|Two| E[iPhone]
-    C -->|Three| F[Car]`
+    C -->|Three| F[Car]
+    
+    %% 添加更多节点来测试滚动
+    F --> G[Test Node 1]
+    G --> H[Test Node 2]
+    H --> I[Test Node 3]
+    I --> J[Test Node 4]
+    J --> K[Test Node 5]
+    K --> L[Test Node 6]
+    L --> M[Test Node 7]
+    M --> N[Test Node 8]
+    N --> O[Test Node 9]
+    O --> P[Test Node 10]
+    P --> Q[Test Node 11]
+    Q --> R[Test Node 12]
+    R --> S[Test Node 13]
+    S --> T[Test Node 14]
+    T --> U[Test Node 15]
+    U --> V[Test Node 16]
+    V --> W[Test Node 17]
+    W --> X[Test Node 18]
+    X --> Y[Test Node 19]
+    Y --> Z[Test Node 20]`
 
 export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError, onError, currentError }: EditorTabsProps) {
     const [code, setCode] = useState(defaultValue)
@@ -192,13 +214,13 @@ ${code}
 
     return (
         <Card className={`h-full flex flex-col ${className}`}>
-            <Tabs defaultValue="editor" className="flex-1 flex flex-col">
-                <TabsList className="grid w-full grid-cols-2">
+            <Tabs defaultValue="editor" className="flex-1 flex flex-col min-h-0">
+                <TabsList className="flex-shrink-0 grid w-full grid-cols-2">
                     <TabsTrigger value="editor">编辑器</TabsTrigger>
                     <TabsTrigger value="settings">设置</TabsTrigger>
                 </TabsList>
-                <TabsContent value="editor" className="flex-1 flex flex-col p-0">
-                    <div className="flex-1">
+                <TabsContent value="editor" className="flex-1 flex flex-col p-0 min-h-0">
+                    <div className="flex-1 overflow-hidden">
                         <CodeMirror
                             value={code}
                             height="100%"
@@ -206,10 +228,11 @@ ${code}
                             theme={theme === 'dark' ? oneDark : noctisLilac}
                             onChange={handleChange}
                             className="h-full"
+                            style={{ overflow: 'auto' }}
                         />
                     </div>
                     {/* AI修复按钮 */}
-                    <div className="p-3 border-t bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950/30 dark:via-blue-950/30 dark:to-indigo-950/30">
+                    <div className="flex-shrink-0 p-3 border-t bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950/30 dark:via-blue-950/30 dark:to-indigo-950/30">
                         <Button 
                             onClick={handleAIFix}
                             disabled={isFixing}

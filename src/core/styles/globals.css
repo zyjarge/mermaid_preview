@@ -75,4 +75,31 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer components {
+  /* 确保编辑器容器正确处理滚动 */
+  .cm-editor {
+    height: 100% !important;
+    overflow: auto !important;
+  }
+  
+  /* 自定义滚动条样式 */
+  .cm-editor ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .cm-editor ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .cm-editor ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+  }
+  
+  .cm-editor ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
 } 

@@ -17,7 +17,29 @@ function App() {
     B --> C{Let me think}
     C -->|One| D[Laptop]
     C -->|Two| E[iPhone]
-    C -->|Three| F[Car]`)
+    C -->|Three| F[Car]
+    
+    %% 添加更多节点来测试滚动
+    F --> G[Test Node 1]
+    G --> H[Test Node 2]
+    H --> I[Test Node 3]
+    I --> J[Test Node 4]
+    J --> K[Test Node 5]
+    K --> L[Test Node 6]
+    L --> M[Test Node 7]
+    M --> N[Test Node 8]
+    N --> O[Test Node 9]
+    O --> P[Test Node 10]
+    P --> Q[Test Node 11]
+    Q --> R[Test Node 12]
+    R --> S[Test Node 13]
+    S --> T[Test Node 14]
+    T --> U[Test Node 15]
+    U --> V[Test Node 16]
+    V --> W[Test Node 17]
+    W --> X[Test Node 18]
+    X --> Y[Test Node 19]
+    Y --> Z[Test Node 20]`)
     const [codeType, setCodeType] = useState<CodeType>('mermaid')
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
