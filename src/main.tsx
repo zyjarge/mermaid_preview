@@ -68,7 +68,14 @@ function App() {
                             {showEditor && (
                                 <>
                                     <ResizablePanel defaultSize={30} className="flex flex-col">
-                                        <EditorTabs className="flex-1" onChange={handleCodeChange} onFixError={handleFixError} onError={handleError} currentError={errorMessage} />
+                                        <EditorTabs 
+                                            className="flex-1" 
+                                            value={code}
+                                            onChange={handleCodeChange} 
+                                            onFixError={handleFixError} 
+                                            onError={handleError} 
+                                            currentError={errorMessage} 
+                                        />
                                         {errorMessage && (() => {
                                             const parsedError = parseError(errorMessage)
                                             const errorDisplay = formatErrorDisplay(parsedError, code)
