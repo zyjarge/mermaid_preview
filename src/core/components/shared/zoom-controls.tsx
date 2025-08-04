@@ -52,7 +52,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
         variant="outline"
         size="sm"
         onClick={onZoomIn}
-        disabled={scale >= 10}
+        disabled={scale >= 50}
         title="放大"
       >
         <Plus className="h-4 w-4" />

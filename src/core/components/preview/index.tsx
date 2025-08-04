@@ -146,7 +146,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     }
 
     const handleZoomIn = () => {
-        setScale(prev => Math.min(10, prev * 1.2))
+        setScale(prev => Math.min(50, prev * 1.2))
         setPosition({ x: 0, y: 0 })
     }
 
@@ -190,7 +190,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
         const mouseX = e.clientX - rect.left
         const mouseY = e.clientY - rect.top
 
-        const newScale = Math.max(0.25, Math.min(10, scale * delta))
+        const newScale = Math.max(0.25, Math.min(50, scale * delta))
         const scaleChange = newScale / scale
 
         const newX = position.x - (mouseX * (scaleChange - 1))
