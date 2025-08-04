@@ -13,9 +13,11 @@ interface PreviewProps {
     code?: string
     codeType?: CodeType
     onError?: (error: string | null) => void
+    showEditor?: boolean
+    onToggleEditor?: () => void
 }
 
-export function Preview({ className = '', code = '', codeType = 'unknown', onError }: PreviewProps) {
+export function Preview({ className = '', code = '', codeType = 'unknown', onError, showEditor = true, onToggleEditor }: PreviewProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
     const [autoFitScale, setAutoFitScale] = useState(1)
@@ -229,6 +231,8 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
                     onZoomIn={handleZoomIn}
                     onZoomOut={handleZoomOut}
                     onReset={handleReset}
+                    showEditor={showEditor}
+                    onToggleEditor={onToggleEditor}
                 />
                 <ExportButtons 
                     targetRef={containerRef}

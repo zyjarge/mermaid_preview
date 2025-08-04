@@ -1,12 +1,14 @@
 import React from 'react';
 import { Button } from '@core/components/ui/button';
-import { Minus, Plus, RotateCcw } from 'lucide-react';
+import { Minus, Plus, RotateCcw, Code, Eye } from 'lucide-react';
 
 interface ZoomControlsProps {
   scale: number;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
+  showEditor?: boolean;
+  onToggleEditor?: () => void;
 }
 
 export const ZoomControls: React.FC<ZoomControlsProps> = ({
@@ -14,9 +16,21 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
   onZoomIn,
   onZoomOut,
   onReset,
+  showEditor = true,
+  onToggleEditor,
 }) => {
   return (
     <div className="flex items-center gap-2">
+      {onToggleEditor && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onToggleEditor}
+          title={showEditor ? "隐藏代码编辑器" : "显示代码编辑器"}
+        >
+          {showEditor ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
+        </Button>
+      )}
       <Button
         variant="outline"
         size="sm"
