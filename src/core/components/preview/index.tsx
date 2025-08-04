@@ -13,9 +13,11 @@ interface PreviewProps {
     code?: string
     codeType?: CodeType
     onError?: (error: string | null) => void
+    showEditor?: boolean
+    onToggleEditor?: () => void
 }
 
-export function Preview({ className = '', code = '', codeType = 'unknown', onError }: PreviewProps) {
+export function Preview({ className = '', code = '', codeType = 'unknown', onError, showEditor = true, onToggleEditor }: PreviewProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
     const [autoFitScale, setAutoFitScale] = useState(1)
@@ -23,6 +25,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     const [isDragging, setIsDragging] = useState(false)
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
     const [theme, setTheme] = useState<Theme>('light')
+    const [hasUserZoomed, setHasUserZoomed] = useState(false)
     const { toast } = useToast()
 
     useEffect(() => {
@@ -39,6 +42,9 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
             onError?.(null) // 清除错误信息
             return
         }
+        
+        // 代码内容改变时，重置用户缩放标志，允许重新计算自适应缩放
+        setHasUserZoomed(false)
 
         const renderDiagram = async () => {
             try {
@@ -74,7 +80,11 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
                         setTimeout(() => {
                             const autoScale = calculateAutoFitScale()
                             setAutoFitScale(autoScale)
-                            setScale(autoScale)
+                            
+                            // 只有在用户没有手动缩放时才重置缩放比例
+                            if (!hasUserZoomed) {
+                                setScale(autoScale)
+                            }
                             
                             // 计算居中位置
                             const parent = containerRef.current?.parentElement
@@ -144,17 +154,20 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     }
 
     const handleZoomIn = () => {
-        setScale(prev => Math.min(10, prev * 1.2))
+        setScale(prev => Math.min(50, prev * 1.2))
         setPosition({ x: 0, y: 0 })
+        setHasUserZoomed(true)
     }
 
     const handleZoomOut = () => {
         setScale(prev => Math.max(0.25, prev / 1.2))
         setPosition({ x: 0, y: 0 })
+        setHasUserZoomed(true)
     }
 
     const handleReset = () => {
         setScale(autoFitScale)
+        setHasUserZoomed(false)
         
         // 重置时也需要重新计算居中位置
         if (containerRef.current) {
@@ -188,7 +201,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
         const mouseX = e.clientX - rect.left
         const mouseY = e.clientY - rect.top
 
-        const newScale = Math.max(0.25, Math.min(10, scale * delta))
+        const newScale = Math.max(0.25, Math.min(50, scale * delta))
         const scaleChange = newScale / scale
 
         const newX = position.x - (mouseX * (scaleChange - 1))
@@ -196,6 +209,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
 
         setScale(newScale)
         setPosition({ x: newX, y: newY })
+        setHasUserZoomed(true)
     }
 
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -229,6 +243,8 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
                     onZoomIn={handleZoomIn}
                     onZoomOut={handleZoomOut}
                     onReset={handleReset}
+                    showEditor={showEditor}
+                    onToggleEditor={onToggleEditor}
                 />
                 <ExportButtons 
                     targetRef={containerRef}
