@@ -1,13 +1,13 @@
 import React from 'react';
 import { Button } from '@core/components/ui/button';
-import { Minus, Plus, RotateCcw, Code, Eye } from 'lucide-react';
+import { Minus, Plus, RotateCcw, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
 
 interface ZoomControlsProps {
   scale: number;
   onZoomIn: () => void;
   onZoomOut: () => void;
   onReset: () => void;
-  showEditor?: boolean;
+  isEditorCollapsed?: boolean;
   onToggleEditor?: () => void;
 }
 
@@ -16,7 +16,7 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
   onZoomIn,
   onZoomOut,
   onReset,
-  showEditor = true,
+  isEditorCollapsed = false,
   onToggleEditor,
 }) => {
   return (
@@ -26,9 +26,9 @@ export const ZoomControls: React.FC<ZoomControlsProps> = ({
           variant="outline"
           size="sm"
           onClick={onToggleEditor}
-          title={showEditor ? "隐藏代码编辑器" : "显示代码编辑器"}
+          title={isEditorCollapsed ? "显示代码编辑器" : "隐藏代码编辑器"}
         >
-          {showEditor ? <Eye className="h-4 w-4" /> : <Code className="h-4 w-4" />}
+          {isEditorCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
         </Button>
       )}
       <Button
