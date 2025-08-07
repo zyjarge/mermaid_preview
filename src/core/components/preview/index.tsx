@@ -13,11 +13,11 @@ interface PreviewProps {
     code?: string
     codeType?: CodeType
     onError?: (error: string | null) => void
-    showEditor?: boolean
+    isEditorCollapsed?: boolean
     onToggleEditor?: () => void
 }
 
-export function Preview({ className = '', code = '', codeType = 'unknown', onError, showEditor = true, onToggleEditor }: PreviewProps) {
+export function Preview({ className = '', code = '', codeType = 'unknown', onError, isEditorCollapsed = false, onToggleEditor }: PreviewProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [scale, setScale] = useState(1)
     const [autoFitScale, setAutoFitScale] = useState(1)
@@ -146,7 +146,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     }
 
     const handleZoomIn = () => {
-        setScale(prev => Math.min(10, prev * 1.2))
+        setScale(prev => Math.min(50, prev * 1.2))
         setPosition({ x: 0, y: 0 })
     }
 
@@ -190,7 +190,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
         const mouseX = e.clientX - rect.left
         const mouseY = e.clientY - rect.top
 
-        const newScale = Math.max(0.25, Math.min(10, scale * delta))
+        const newScale = Math.max(0.25, Math.min(50, scale * delta))
         const scaleChange = newScale / scale
 
         const newX = position.x - (mouseX * (scaleChange - 1))
@@ -231,7 +231,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
                     onZoomIn={handleZoomIn}
                     onZoomOut={handleZoomOut}
                     onReset={handleReset}
-                    showEditor={showEditor}
+                    isEditorCollapsed={isEditorCollapsed}
                     onToggleEditor={onToggleEditor}
                 />
                 <ExportButtons 
