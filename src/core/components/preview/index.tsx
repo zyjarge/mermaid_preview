@@ -25,6 +25,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     const [isDragging, setIsDragging] = useState(false)
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
     const [theme, setTheme] = useState<Theme>('light')
+    const [hasUserZoomed, setHasUserZoomed] = useState(false)
     const { toast } = useToast()
 
     useEffect(() => {
@@ -41,6 +42,9 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
             onError?.(null) // 清除错误信息
             return
         }
+        
+        // 代码内容改变时，重置用户缩放标志，允许重新计算自适应缩放
+        setHasUserZoomed(false)
 
         const renderDiagram = async () => {
             try {
@@ -76,7 +80,11 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
                         setTimeout(() => {
                             const autoScale = calculateAutoFitScale()
                             setAutoFitScale(autoScale)
-                            setScale(autoScale)
+                            
+                            // 只有在用户没有手动缩放时才重置缩放比例
+                            if (!hasUserZoomed) {
+                                setScale(autoScale)
+                            }
                             
                             // 计算居中位置
                             const parent = containerRef.current?.parentElement
@@ -148,15 +156,18 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
     const handleZoomIn = () => {
         setScale(prev => Math.min(50, prev * 1.2))
         setPosition({ x: 0, y: 0 })
+        setHasUserZoomed(true)
     }
 
     const handleZoomOut = () => {
         setScale(prev => Math.max(0.25, prev / 1.2))
         setPosition({ x: 0, y: 0 })
+        setHasUserZoomed(true)
     }
 
     const handleReset = () => {
         setScale(autoFitScale)
+        setHasUserZoomed(false)
         
         // 重置时也需要重新计算居中位置
         if (containerRef.current) {
@@ -198,6 +209,7 @@ export function Preview({ className = '', code = '', codeType = 'unknown', onErr
 
         setScale(newScale)
         setPosition({ x: newX, y: newY })
+        setHasUserZoomed(true)
     }
 
     const handleMouseDown = (e: React.MouseEvent) => {

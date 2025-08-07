@@ -20,6 +20,7 @@ interface EditorTabsProps {
     onChange?: (value: string, type: CodeType) => void
     className?: string
     defaultValue?: string
+    value?: string
     onFixError?: (fixedCode: string) => void
     onError?: (error: string | null) => void
     currentError?: string | null
@@ -54,8 +55,9 @@ const DEFAULT_CODE = `graph TD
     X --> Y[Test Node 19]
     Y --> Z[Test Node 20]`
 
-export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, onFixError, onError, currentError }: EditorTabsProps) {
-    const [code, setCode] = useState(defaultValue)
+export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CODE, value, onFixError, onError, currentError }: EditorTabsProps) {
+    const [internalCode, setInternalCode] = useState(defaultValue)
+    const code = value !== undefined ? value : internalCode
     const [codeType, setCodeType] = useState<CodeType>('markdown')
     const [theme, setTheme] = useState<Theme>('light')
     const [isFixing, setIsFixing] = useState(false)
@@ -91,7 +93,7 @@ export function EditorTabs({ onChange, className = '', defaultValue = DEFAULT_CO
     }, [])
 
     const handleChange = (value: string) => {
-        setCode(value)
+        setInternalCode(value)
         const type = CodeDetector.detect(value)
         setCodeType(type)
         onChange?.(value, type)
@@ -182,7 +184,7 @@ ${code}
             // 更新代码
             const trimmedCode = extractedCode.trim()
             if (trimmedCode) {
-                setCode(trimmedCode)
+                setInternalCode(trimmedCode)
                 const type = CodeDetector.detect(trimmedCode)
                 setCodeType(type)
                 onChange?.(trimmedCode, type)
